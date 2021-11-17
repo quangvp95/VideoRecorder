@@ -1,7 +1,9 @@
 package com.junerver.videorecorder
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.graphics.*
 import android.hardware.Camera
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -10,37 +12,22 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
-import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.View
+import android.view.WindowManager
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_video_record.*
+import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
-import java.nio.ByteBuffer
 import java.util.*
 import kotlin.concurrent.thread
-import android.hardware.camera2.CameraAccessException
-import android.R.attr.y
-import android.R.attr.x
-import android.content.Context
-import android.opengl.ETC1.getHeight
-import android.opengl.ETC1.getWidth
-import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.params.StreamConfigurationMap
-import android.view.Display
-import android.content.Context.WINDOW_SERVICE
-import android.graphics.*
-import android.hardware.camera2.CameraManager
-import androidx.core.content.ContextCompat.getSystemService
-import android.view.WindowManager
-import java.io.BufferedOutputStream
 
 
-public val TYPE_VIDEO = 0  //视频模式
-public val TYPE_IMAGE = 1  //拍照模式
+val TYPE_VIDEO = 0  //视频模式
+val TYPE_IMAGE = 1  //拍照模式
 
 class VideoRecordActivity : AppCompatActivity() {
 

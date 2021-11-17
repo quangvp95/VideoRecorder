@@ -2,10 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.junerver.videorecorder">
-
     <!-- 录像 -->
-    <uses-feature android:name="android.hardware.camera"/>
-    <uses-feature android:name="android.hardware.camera.autofocus"/>
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -13,23 +13,26 @@
 
     <application
         android:allowBackup="true"
+        android:appComponentFactory="VideoRecorder"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
-        tools:replace="android:appComponentFactory"
-        android:appComponentFactory="VideoRecorder"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="GoogleAppIndexingWarning"
+        tools:replace="android:appComponentFactory">
+        <activity
+            android:name=".VideoRecordActivityJava"
+            android:exported="true" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <!--录短视频-->
-        <activity android:name=".VideoRecordActivity"></activity>
+        </activity> <!-- 录短视频 -->
+        <activity android:name=".VideoRecordActivity" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.junerver.videorecorder.fileprovider"

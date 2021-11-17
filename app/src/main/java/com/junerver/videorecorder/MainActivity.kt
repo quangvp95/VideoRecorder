@@ -16,7 +16,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         mBtnRecord.setOnClickListener {
             rxRequestPermissions(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO, describe = "相机、存储、录音") {
-                startActivityForResult(Intent(this@MainActivity, VideoRecordActivity::class.java), REQUEST_VIDEO)
+                startActivityForResult(
+                    Intent(
+                        this@MainActivity,
+                        VideoRecordActivityJava::class.java
+                    ), REQUEST_VIDEO
+                )
             }
         }
     }
