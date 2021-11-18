@@ -38,9 +38,11 @@ import java.util.List;
 
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "ConstantConditions"})
 public class VideoRecordActivityJava extends AppCompatActivity {
     private static final String TAG = "QuangNHe";
+
+    private static final int CAMERA_INFO = Camera.CameraInfo.CAMERA_FACING_FRONT;
 
     private static final int TYPE_VIDEO = 0;
     private static final int TYPE_IMAGE = 1;
@@ -49,7 +51,7 @@ public class VideoRecordActivityJava extends AppCompatActivity {
     private boolean mStartedFlag = false; //录像中标志
     private boolean mPlayFlag = false;
     private MediaRecorder mRecorder;
-    private SurfaceHolder mSurfaceHolder;
+    private SurfaceHolder mReplayHolder;
     private Camera mCamera;
     private MediaPlayer mMediaPlayer;
     private String dirPath; //目标文件夹地址
@@ -90,24 +92,24 @@ public class VideoRecordActivityJava extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_video_record);
+        setContentView(R.layout.activity_video_record_java);
         mMediaPlayer = new MediaPlayer();
 
-        SurfaceView mSurfaceView = findViewById(R.id.mSurfaceview);
         mBtnRecord = findViewById(R.id.mBtnRecord);
         mBtnPlay = findViewById(R.id.mBtnPlay);
-        Button mBtnCancel = findViewById(R.id.mBtnCancle);
+        Button mBtnCancel = findViewById(R.id.mBtnCancel);
         Button mBtnSubmit = findViewById(R.id.mBtnSubmit);
         mLlRecordBtn = findViewById(R.id.mLlRecordBtn);
         mLlRecordOp = findViewById(R.id.mLlRecordOp);
         mProgress = findViewById(R.id.mProgress);
 
-        SurfaceHolder holder = mSurfaceView.getHolder();
-        holder.addCallback(new SurfaceHolder.Callback() {
+        SurfaceView mRecordView = findViewById(R.id.mRecordView);
+        SurfaceHolder recordViewHolder = mRecordView.getHolder();
+        recordViewHolder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
                 if (holder == null) return;
-                mSurfaceHolder = holder;
+                Log.d(TAG, "surfaceChanged " + format + " | " + width + " | " + height);
                 mCamera.startPreview();
                 mCamera.cancelAutoFocus();
                 mCamera.unlock();
@@ -116,37 +118,62 @@ public class VideoRecordActivityJava extends AppCompatActivity {
 
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
+                Log.d(TAG, "surfaceDestroyed " + holder);
                 handler.removeCallbacks(runnable);
             }
 
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 if (holder == null) return;
+                Log.d(TAG, "surfaceCreated " + holder);
                 try {
-                    mSurfaceHolder = holder;
-                    //使用后置摄像头
-                    mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
+                    //Use the rear camera
+                    mCamera = Camera.open(CAMERA_INFO);
                     mCamera.setDisplayOrientation(90);//旋转90度
                     mCamera.setPreviewDisplay(holder);
                     Camera.Parameters params = mCamera.getParameters();
-                    //注意此处需要根据摄像头获取最优像素，//如果不设置会按照系统默认配置最低160x120分辨率
+                    //Note that here you need to obtain the optimal pixels according to the camera，
+                    // If not set, the minimum 160x120 resolution will be configured according to the system default
                     Pair<Integer, Integer> size = getPreviewSize();
                     params.setPictureSize(size.first, size.second);
                     params.setJpegQuality(100);
                     params.setPictureFormat(PixelFormat.JPEG);
-                    params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);//1连续对焦
+                    if (CAMERA_INFO == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                        params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);//1 Continuous focus
+                    }
                     mCamera.setParameters(params);
                 } catch (RuntimeException | IOException e) {
-                    //Camera.open() 在摄像头服务无法连接时可能会抛出 RuntimeException
+                    //Camera.open() may throw a RuntimeException when the camera service cannot be connected
+                    e.printStackTrace();
                     finish();
                 }
             }
 
         });
+
+        SurfaceView mReplayView = findViewById(R.id.mReplayView);
+        SurfaceHolder replayViewHolder = mReplayView.getHolder();
+        replayViewHolder.addCallback(new SurfaceHolder.Callback() {
+
+            @Override
+            public void surfaceCreated(SurfaceHolder holder) {
+                mReplayHolder = holder;
+            }
+
+            @Override
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                mReplayHolder = holder;
+            }
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder holder) {
+            }
+        });
+
         mBtnRecord.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Log.d("点击屏幕", "${event.action}");
+                Log.d(TAG, "Touch the screen: " + event.getAction());
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     startRecord();
                 }
@@ -162,8 +189,6 @@ public class VideoRecordActivityJava extends AppCompatActivity {
                 playRecord();
             }
         });
-        {
-        }
         mBtnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -244,8 +269,8 @@ public class VideoRecordActivityJava extends AppCompatActivity {
             mStartedFlag = true;
             mLlRecordOp.setVisibility(View.INVISIBLE);
             mBtnPlay.setVisibility(View.INVISIBLE);
-            mLlRecordBtn.setVisibility(View.INVISIBLE);
-            mProgress.setVisibility(View.INVISIBLE); //The progress bar is visible
+            mLlRecordBtn.setVisibility(View.VISIBLE);
+            mProgress.setVisibility(View.VISIBLE); //The progress bar is visible
             //start the timer
             handler.postDelayed(runnable, maxSec * 10L);
             recorderReleaseEnable = true;
@@ -265,7 +290,7 @@ public class VideoRecordActivityJava extends AppCompatActivity {
             // at android.media.MediaRecorder.stop(Native Method)
             mRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264); //视频编码格式
             //Set the final output resolution
-            mRecorder.setVideoSize(640, 480);
+//            mRecorder.setVideoSize(640, 480);
             mRecorder.setVideoFrameRate(30);
             mRecorder.setVideoEncodingBitRate(3 * 1024 * 1024);
             mRecorder.setOrientationHint(90);
@@ -280,7 +305,7 @@ public class VideoRecordActivityJava extends AppCompatActivity {
             }
             dirPath = dir.getAbsolutePath();
             path = dir.getAbsolutePath() + "/" + getDate() + ".mp4";
-            Log.d(TAG, "startRecord $path：" + path);
+            Log.d(TAG, "startRecord path：" + path);
             mRecorder.setOutputFile(path);
             try {
                 mRecorder.prepare();
@@ -363,9 +388,9 @@ public class VideoRecordActivityJava extends AppCompatActivity {
                     public void onPictureTaken(byte[] data, Camera camera) {
                         saveImage(data, new OnDoneListener() {
                             @Override
-                            public void onDone(String imagepath) {
-                                Log.d(TAG, "转为拍照，获取到图片数据 $imagepath");
-                                imgPath = imagepath;
+                            public void onDone(String imagePath) {
+                                Log.d(TAG, "Switch to taking pictures and get picture data " + imagePath);
+                                imgPath = imagePath;
                                 mCamera.lock();
                                 mCamera.stopPreview();
                                 mCamera.release();
@@ -389,7 +414,7 @@ public class VideoRecordActivityJava extends AppCompatActivity {
 
     //Play video
     private void playRecord() {
-        //Fix the problem that the home button cannot be played
+        // Fix the problem that the home button cannot be played
         // when the home button is cut out and cut back again during recording
         if (cameraReleaseEnable) {
             Log.d(TAG, "Recycle camera resources");
@@ -406,10 +431,11 @@ public class VideoRecordActivityJava extends AppCompatActivity {
         Uri uri = Uri.parse(path);
         mMediaPlayer = MediaPlayer.create(VideoRecordActivityJava.this, uri);
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mMediaPlayer.setDisplay(mSurfaceHolder);
+        mMediaPlayer.setDisplay(mReplayHolder);
         mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
+                mBtnPlay.setVisibility(View.VISIBLE);
             }
         });
         try {
@@ -517,11 +543,11 @@ public class VideoRecordActivityJava extends AppCompatActivity {
         List<Camera.Size> availablePreviewSizes = mCamera.getParameters().getSupportedPreviewSizes();
         Log.e(TAG, "Screen width " + screenResolution.x + "  Screen height " + screenResolution.y);
         for (Camera.Size previewSize : availablePreviewSizes) {
-            Log.v(TAG, " PreviewSizes = $previewSize");
+            Log.v(TAG, " PreviewSizes = " + previewSize);
             mCameraPreviewWidth = previewSize.width;
             mCameraPreviewHeight = previewSize.height;
             int newDiffs = Math.abs(mCameraPreviewWidth - screenResolution.y) + Math.abs(mCameraPreviewHeight - screenResolution.x);
-            Log.v(TAG, "newDiffs = $newDiffs");
+            Log.v(TAG, "newDiffs = " + newDiffs);
             if (newDiffs == 0) {
                 bestPreviewWidth = mCameraPreviewWidth;
                 bestPreviewHeight = mCameraPreviewHeight;
