@@ -3,8 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Android/Project/VideoRecorderJunerver/app/src/main/res/layout/activity_main.xml" value="0.371875" />
         <entry key="..\:/Android/Project/VideoRecorderJunerver/app/src/main/res/layout/activity_video_record.xml" value="0.16018518518518518" />
         <entry key="..\:/Android/Project/VideoRecorderJunerver/app/src/main/res/layout/activity_video_record_java.xml" value="0.1" />
+        <entry key="..\:/Android/Project/VideoRecorderJunerver/app/src/main/res/layout/pip_player.xml" value="0.371875" />
       </map>
     </option>
   </component>

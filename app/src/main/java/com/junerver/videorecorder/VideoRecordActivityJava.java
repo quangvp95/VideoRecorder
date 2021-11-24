@@ -40,7 +40,7 @@ import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 @SuppressWarnings({"deprecation", "ConstantConditions"})
 public class VideoRecordActivityJava extends AppCompatActivity {
-    private static final String TAG = "QuangNHe";
+    public static final String TAG = "QuangNHe";
 
     private static final int CAMERA_INFO = Camera.CameraInfo.CAMERA_FACING_FRONT;
 
@@ -131,6 +131,7 @@ public class VideoRecordActivityJava extends AppCompatActivity {
                     mCamera = Camera.open(CAMERA_INFO);
                     mCamera.setDisplayOrientation(90);//旋转90度
                     mCamera.setPreviewDisplay(holder);
+                    mCamera.enableShutterSound(false);
                     Camera.Parameters params = mCamera.getParameters();
                     //Note that here you need to obtain the optimal pixels according to the camera，
                     // If not set, the minimum 160x120 resolution will be configured according to the system default
@@ -564,6 +565,75 @@ public class VideoRecordActivityJava extends AppCompatActivity {
         Log.e(TAG, "Best width " + bestPreviewWidth + " best height " + bestPreviewHeight);
         return new Pair<>(bestPreviewWidth, bestPreviewHeight);
     }
+
+//    private void takePhoto() {
+//
+//        System.out.println("Preparing to take photo");
+//        Camera camera = null;
+//
+//        int cameraCount = 0;
+//        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+//        cameraCount = Camera.getNumberOfCameras();
+//        for (int camIdx = 0; camIdx < cameraCount; camIdx++) {
+//            SystemClock.sleep(1000);
+//
+//            Camera.getCameraInfo(camIdx, cameraInfo);
+//
+//            try {
+//                camera = Camera.open(camIdx);
+//            } catch (RuntimeException e) {
+//                System.out.println("Camera not available: " + camIdx);
+//                camera = null;
+//                //e.printStackTrace();
+//            }
+//            try {
+//                if (null == camera) {
+//                    System.out.println("Could not get camera instance");
+//                } else {
+//                    System.out.println("Got the camera, creating the dummy surface texture");
+//                    //SurfaceTexture dummySurfaceTextureF = new SurfaceTexture(0);
+//                    try {
+//                        //camera.setPreviewTexture(dummySurfaceTextureF);
+//                        camera.setPreviewTexture(new SurfaceTexture(0));
+//                        camera.startPreview();
+//                    } catch (Exception e) {
+//                        System.out.println("Could not set the surface preview texture");
+//                        e.printStackTrace();
+//                    }
+//                    camera.takePicture(null, null, new Camera.PictureCallback() {
+//
+//                        @Override
+//                        public void onPictureTaken(byte[] data, Camera camera) {
+//                            File pictureFileDir = getDir();
+//                            if (!pictureFileDir.exists() && !pictureFileDir.mkdirs()) {
+//                                return;
+//                            }
+//                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyymmddhhmmss");
+//                            String date = dateFormat.format(new Date());
+//                            String photoFile = "PictureFront_" + "_" + date + ".jpg";
+//                            String filename = pictureFileDir.getPath() + File.separator + photoFile;
+//                            File mainPicture = new File(filename);
+////                            addImageFile(mainPicture);
+//
+//                            try {
+//                                FileOutputStream fos = new FileOutputStream(mainPicture);
+//                                fos.write(data);
+//                                fos.close();
+//                                System.out.println("image saved");
+//                            } catch (Exception error) {
+//                                System.out.println("Image could not be saved");
+//                            }
+//                            camera.release();
+//                        }
+//                    });
+//                }
+//            } catch (Exception e) {
+//                camera.release();
+//            }
+//
+//
+//        }
+//    }
 
     private interface OnDoneListener {
         void onDone(String path);
