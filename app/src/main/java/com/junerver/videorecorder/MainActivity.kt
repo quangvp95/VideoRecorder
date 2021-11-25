@@ -2,14 +2,11 @@ package com.junerver.videorecorder
 
 import android.Manifest
 import android.app.Activity
-import android.app.AppOpsManager
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.junerver.videorecorder.pip.PipManager
 import kotlinx.android.synthetic.main.activity_main.*
@@ -32,16 +29,32 @@ class MainActivity : AppCompatActivity() {
                 startActivityForResult(
                     Intent(
                         this@MainActivity,
+                        VideoRecordActivity::class.java
+                    ), REQUEST_VIDEO
+                )
+            }
+        }
+        mBtnRecord3.setOnClickListener {
+            rxRequestPermissions(
+                Manifest.permission.CAMERA,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.RECORD_AUDIO,
+                describe = "相机、存储、录音"
+            ) {
+                startActivityForResult(
+                    Intent(
+                        this@MainActivity,
                         VideoRecordActivityJava::class.java
                     ), REQUEST_VIDEO
                 )
             }
         }
         mBtnRecord2.setOnClickListener {
-            pipManager = PipManager(this)
-            pipManager.enterPip()
+            if (checkDrawOverlayPermission()) {
+                pipManager = PipManager(this)
+                pipManager.enterPip()
+            }
         }
-        Log.d(VideoRecordActivityJava.TAG, "Permission ${hasPermission()}")
         checkDrawOverlayPermission()
     }
 
@@ -58,19 +71,6 @@ class MainActivity : AppCompatActivity() {
             false
         } else {
             true
-        }
-    }
-
-    private fun hasPermission(): Boolean {
-        val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager?
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            appOps?.checkOpNoThrow(
-                AppOpsManager.OPSTR_PICTURE_IN_PICTURE,
-                android.os.Process.myUid(),
-                packageName
-            ) == AppOpsManager.MODE_ALLOWED
-        } else {
-            false
         }
     }
 
